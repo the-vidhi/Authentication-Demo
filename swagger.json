@@ -1,0 +1,379 @@
+{
+    "swagger": "2.0",
+  
+    "info": {
+      "version": "1.0.0",
+      "title": "My Test Application API",
+      "description": "Node.js and Express.js Application API",
+      "license": {
+        "name": "mytestapp",
+        "url": "https://mytestapp.com/"
+      }
+    },
+    "tags": [
+        { "name": "Auth" },
+        { "name": "Post" }
+    ],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+
+    "securityDefinitions": {
+        "jwt": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+        }
+    },
+    "security": [
+        {
+            "jwt": []
+        }
+    ],
+    "paths": {
+        "/auth/signup": {
+            "post": {
+              "tags": ["Auth"],
+              "summary": "Signup API",
+              "security" : [],
+              "parameters": [
+                {
+                  "name": "user",
+                  "in": "body",
+                  "description": "Create new account",
+                  "schema": {
+                    "allOf":[
+                        {
+                            "$ref": "../componants/definations.json#/definitions/SignUp"
+                        }
+                    ]
+                  }
+                }
+              ],
+              "produces": ["application/json"],
+              "responses": {
+                "200": {
+                  "description": "Create new post",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "status"  : { "type": "boolean"}                          
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+        },
+        "/auth/login": {
+            "post": {
+              "tags": ["Auth"],
+              "summary": "Login API",
+              "security" : [],
+              "parameters": [
+                {
+                  "name": "user",
+                  "in": "body",
+                  "description": "Login account",
+                  "schema": {
+                    "type": "object",
+                    "required"  : ["email", "password"],
+                    "properties": {
+                      "email"     : { "type": "string"},
+                      "password"  : { "type": "string"}
+                    }
+                  }
+                }
+              ],
+              "produces": ["application/json"],
+              "responses": {
+                "200": {
+                  "description": "Login account",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/LoginResponse"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+        },
+        "/post/{entity}": {
+          "parameters":[
+            {
+              "name": "entity",
+              "in": "path",
+              "required": true,
+              "description": "entity of post",
+              "type": "string"
+            }
+          ],
+          "get": {
+            "tags": ["Post"],
+            "summary": "Get all post",
+            "responses": {
+              "200": {
+                "description": "Get all post",
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "boolean"},
+                        "data": {
+                          "type" : "array",
+                          "items":{
+                            "allOf":[
+                              { "$ref": "#/definitions/Post" },
+                              {
+                                "type": "object",
+                                "properties":{
+                                  "_id"   : { "type"  : "string"},
+                                  "user"  : {
+                                    "type"        : "object",
+                                    "properties"  : {
+                                      "_id"       : { "type" : "string" },
+                                      "fname" : { "type" : "string" },
+                                      "lname"  : { "type" : "string" }
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }          
+        },
+        "/post/{entity}/{id}": {
+          "parameters": [
+            {
+              "name": "entity",
+              "in": "path",
+              "required": true,
+              "description": "entity of post",
+              "type": "string"
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID of post",
+              "type": "string"
+            }
+          ],
+          "get": {
+            "tags": ["Post"],
+            "summary": "Get post by id",
+            "responses": {
+              "200": {
+                "description": "Get post by id",
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "boolean"},
+                        "data": {
+                          "allOf":[
+                            { "$ref": "#/definitions/Post" },
+                            {
+                              "type": "object",
+                              "properties":{
+                                "_id"   : { "type"  : "string"},
+                                "user"  : {
+                                  "type"        : "object",
+                                  "properties"  : {
+                                    "_id"       : { "type" : "string" },
+                                    "firstName" : { "type" : "string" },
+                                    "lastName"  : { "type" : "string" }
+                                  }
+                                },
+                                "comments"      : {
+                                  "type" : "array" ,
+                                  "items": {
+                                    "type" : "object",
+                                    "properties": {
+                                      "_id"     : { "type" : "string"},
+                                      "message" : { "type": "string"},
+                                      "user"    : {
+                                        "type"        : "object",
+                                        "properties"  : {
+                                          "_id"       : { "type" : "string" },
+                                          "firstName" : { "type" : "string" },
+                                          "lastName"  : { "type" : "string" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "/post": {
+          "post": {
+            "tags": ["Post"],
+            "summary": "Create new post",
+            "parameters": [
+              {
+                "name": "user",
+                "in": "body",
+                "description": "Create new post",
+                "schema": {
+                  "allOf":[
+                    {
+                      "$ref": "#/definitions/Post"
+                    },
+                    {
+                      "type": "object",
+                      "required": ["title", "desc"]
+                    }
+                  ]
+                }
+              }
+            ],
+            "produces": ["application/json"],
+            "responses": {
+              "200": {
+                "description": "Create new post",
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status"  : { "type": "boolean"},
+                        "data": {
+                          "allOf":[
+                            { "$ref": "#/definitions/Post" },
+                            {
+                              "type": "object",
+                              "properties":{
+                                "_id"       : { "type": "string"}
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "/post/{entity}/{_id}": {
+          "parameters":[
+            {
+              "name": "entity",
+              "in": "path",
+              "required": true,
+              "description": "entity of post",
+              "type": "string"
+            },
+            {
+              "name": "_id",
+              "in": "path",
+              "required": true,
+              "description": "entity of post",
+              "type": "string"
+            }
+          ],
+          "put": {
+            "tags": ["Post"],
+            "summary": "Update post by id",
+            "parameters": [
+              {
+                "name": "user",
+                "in": "body",
+                "description": "Update post by id",
+                "schema": {
+                  "allOf":[
+                    {
+                      "$ref": "#/definitions/Post"
+                    }
+                  ]
+                }
+              }
+            ],
+            "produces": ["application/json"],
+            "responses": {
+              "200": {
+                "description": "Update post by id",
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status"  : { "type": "boolean"},
+                        "data": {
+                          "allOf":[
+                            { "$ref": "#/definitions/Post" },
+                            {
+                              "type": "object",
+                              "properties":{
+                                "_id"       : { "type": "string"},
+                                "user"      : { "type": "string"}
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "/post/{_id}": {
+          "parameters":[
+            {
+              "name": "_id",
+              "in": "path",
+              "required": true,
+              "description": "entity of post",
+              "type": "string"
+            }
+          ],
+          "delete": {
+            "tags": ["Post"],
+            "summary": "Delete post by id",
+            "responses": {
+              "200": {
+                "description": "Delete post by id",
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status"  : { "type": "boolean"},
+                        "message" : { "type": "string"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+    }
+
+}
