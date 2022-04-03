@@ -1,0 +1,251 @@
+<html>
+
+<head>
+    <title>User | Blog List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <link rel="stylesheet" href="../stylesheets/style.css"> -->
+</head>
+
+<body>
+
+    <div class="m-5 p-5 bloglist">       
+        
+        <div class="col col-12 mb-3 mydiv">
+            <button class="btn btn-info mydiv mydiv1" onclick="posts()">Post List</button>
+            <h3 class="mydiv mydiv2">Blog List</h3>
+            <button class="btn btn-dark mydiv mydiv3" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="page" style="width: auto;">
+            <div id="loading"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+            <table id="student_table" class="table table-bordered" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table><br>
+            <div class="text-center">
+                <button type="button" class="btn btn-success mydiv4" onclick="addFunc()">Add Blog</button>
+            </div>
+        </div>
+    </div>
+    <div id="msg_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val2" style="color: green;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="err_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val1" style="color: red;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Are Sure you want to delete record ??</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="delete_form">
+                        <input type="hidden" name="delid" id="delid"><br>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">Cancle</button>
+                        <input type="button" name="delete" id="delete-btn" value="Delete" onclick="DelFunc()"
+                            class="btn btn-danger" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+</body>
+
+<!-- <script src="https://code.jquery.com/jquery-3.5.0.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+
+
+    $(document).ready(function () {
+        $("#student_table").hide();
+        var tokendata = localStorage.getItem('secret-token')
+        var id = localStorage.getItem('id');
+
+        dispData();
+
+    });
+
+    
+    function dispData() {
+
+        var tokendata = localStorage.getItem('secret-token')        
+            var id = localStorage.getItem('id');
+            $.ajax({
+                url: "/blog/user/blogs",
+                type: "GET",
+                // headers:{'secret-token': tokendata},   
+                beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+                success: function (data) {
+                    $('#loading').hide();
+                    $("#student_table").show();
+                    console.log(tokendata);
+                    // console.log("------------",JSON.parse(data));
+                    // let blogData =  JSON.parse(data);
+                    $('#student_table').DataTable({
+                        data: JSON.parse(data.data),
+                        columns: [
+                            { data: 'title' },
+                            {
+                                data: data,
+                                className: "dt-center editor-edit",
+                                "render": function (data, type, row, meta)
+                                {
+                                    if(id == data.user._id){
+                                        // return '<button class="btn_edit btn btn-info" onclick="dispData(\'' + data._id + '\')"><i class="fa fa-pencil"/></button>'; 
+                                        return '<a href="/blog/list/'+data._id+'"+" class="btn btn-success"><i class="fa fa-pencil"></i></a>'
+                                    }
+                                    else{ return '<a href="/blog/list/'+data._id+'"+" class="btn btn-info"><i class="fa fa-eye"></i></a>'}
+                                },
+                                orderable: false
+                            },
+                            {
+                                data: data,
+                                className: "dt-center editor-delete",
+                                "render": function (data, type, row, meta)
+                                { 
+                                    if(id == data.user._id){
+                                        return '<button class="btn_del btn btn-danger" onclick="deleteopen(\'' + data._id + '\')"><i class="fa fa-trash"/></button>'; 
+                                    }
+                                    else{ return '<button class="btn btn-danger" disabled><i class="fa fa-ban"></i></button>'; }
+                                    
+                                },
+                                orderable: false
+                            }
+                        ]
+                    });
+                },
+                error: function (data) {
+                    $('#loading').hide();
+                    console.log(data);
+                    document.getElementById('val1').innerHTML = data.responseJSON.message;
+                    $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            
+                            if(data.responseJSON.status="false")
+                            {
+                                // location.reload();
+                                location.href ="/auth/login";
+                            }
+                            else{
+                                localStorage.clear();
+                                location.href = "/auth/login";
+                            }
+                            
+                        }, 2000);
+                    })
+                },
+            });
+       
+    }
+
+    function addFunc(){
+        location.href = "/blog/list"
+    }
+
+    function deleteopen(id) {
+        console.log("HIIII");
+        $('#delete_modal').modal('show');
+        $('#delid').val(id);
+        console.log("____", id);
+    }
+
+    function DelFunc() {
+        var tokendata = localStorage.getItem('secret-token')
+        var id1 = $('#delid').val();
+        console.log(id1);
+        console.log(tokendata);
+        $.ajax({
+            type: "POST",
+            url: '/blog/' + id1,
+            // data: formData,
+            beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+            success: function (data) {
+                console.log(data);
+                document.getElementById('val2').innerHTML = 'Record Deleted...'
+                $('#delete_modal').modal('hide');
+                $('#msg_modal').modal('show').on('shown.bs.modal', function (f) {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                })
+            },
+            error: function (data) {
+                console.log(data);
+                $('#delete_modal').modal('hide');
+                document.getElementById('val1').innerHTML = data.responseJSON.message;
+                $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            
+                            if(data.responseJSON.status="false")
+                            {
+                                location.reload();
+                            }
+                            else{
+                                localStorage.clear();
+                                location.href = "/auth/login";
+                            }
+                            
+                        }, 2000);
+                    })
+            }
+        });
+    }
+
+    function logout(){
+        localStorage.clear();
+        location.href="/auth/login"
+    }
+    function posts(){
+        location.href="/post/home"
+    }
+</script>
+
+
+</html>

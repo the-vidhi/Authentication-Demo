@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User | Blog</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+        
+        
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css">
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <!-- <link rel="stylesheet" href="../stylesheets/style.css"> -->
+
+       
+    </head>
+<body>
+   <h3>Blogs</h3> 
+
+   <form id="formId" class="blogForm">
+    <div><label>Title</label></div>
+    <div><input type="text" id="title" name="title" class="form-control mb-3" maxlength="20"></div>
+    <div><label>Desciption</label></div>
+    <div><textarea name="blog" id="blog" class="form-control"></textarea></div>                
+    <div><input type="hidden" id="id" name="id"></div>
+    <!-- <textarea class="textarea" id="textarea"></textarea> -->
+    <div class="text-center">
+        <button type="button" class="btn btn-dark mt-3" onclick="BackFunc()" style="width: 100px;">Back</button>    
+        <button type="button" class="btn btn-info mt-3" id="btn-save" onclick="clickFunc()" style="width: 100px;">Save</button>
+       
+    </div>
+    <div id="msg_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val2" style="color: green;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="err_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val1" style="color: red;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-te/1.4.0/jquery-te.min.js" integrity="sha512-813LH2NdwwzXnVfsmzSuAyyit5bRFdh997hN9Vzm0cdx3LdZV7TZNNb2Ag0dgJPD3J1Xn1Alg2YW70id+RtLrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-te/1.4.0/jquery-te.js" integrity="sha512-p+t5jmGip+usIsbm05GROdslxcOlJ1N2SbM7Nm50G4VFidbMD/zkPq6g77/3GUxfCycKVwGk/IOJKnL7jptcmA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        // let text = $("#blog").val()
+        let editor = CKEDITOR.replace( 'blog' );
+        
+        // CKEDITOR.instances.blog.setData(text);
+
+        console.log("Helloooo"); 
+
+        let a = window.location.href
+        console.log("a=",a);
+        let b = a.split('/')
+        console.log("b=",b);
+        let _id = b.pop()
+        console.log("ID=", _id);
+        console.log(_id.length);
+
+        if(_id.length > 4){
+            console.log("hiii");
+            dispData(_id)
+        }
+        
+    })
+
+    function clickFunc(){
+        var id = $('#id').val();
+        console.log("id=",id);
+        if(id){
+            editFunc()
+        }
+        else{
+            addFunc()
+        }
+    }
+
+    function dispData(_id){
+        console.log("id",_id);
+        
+        var tokendata = localStorage.getItem('secret-token')
+        $.ajax({
+            url: "/blog/user/blogs/" + _id,
+            type: "GET",
+            beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+            success: function (data) {
+
+                $('#loading').hide();
+                // let newDATA = JSON.stringify(JSON.parse(data));
+                console.log(data.data);
+                const postData = JSON.parse(data.data);
+                console.log(postData.user._id);
+                var id = localStorage.getItem('id');
+
+                if(id!=postData.user._id){                    
+                  
+                    $('#title').val(postData.title)
+                    $('#id').val(postData._id);
+                    CKEDITOR.instances['blog'].setData(postData.blog);
+
+                    document.getElementById("title").readOnly = true;
+                    $("#blog").prop("readonly", true);
+                }
+                else{
+                    $('#title').val(postData.title);
+                    $('#id').val(postData._id);
+                    CKEDITOR.instances['blog'].setData(postData.blog);
+                }
+            },
+            error: function (data) {
+                $('#loading').hide();
+                document.getElementById('val1').innerHTML = data.responseText;
+                $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                    setTimeout(function () {
+                    //    location.href = "/blog/home";  
+                    }, 2000);
+                })
+            },
+        });
+    }
+
+    function addFunc(){
+        console.log("add fun");
+        $("#formId").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 20
+                },
+                blog: {
+                    required: true
+                }
+            },
+            messages: {
+
+                title: {
+                    required: "Enter Title",
+                },
+                blog: {
+                    required: "Enter Blog Content",
+                }
+            },
+            submitHandler: function (form) {
+                form.submit();
+            },
+            errorPlacement: function (label, element) {
+                label.insertAfter(element);
+            },
+        })
+        if ($("#formId").valid()) {
+                var data = CKEDITOR.instances.blog.getData();
+                // let text = editor.getData();
+                const formData = $('#formId').serializeArray();
+                formData[1].value = CKEDITOR.instances.blog.getData();
+                formData[2].value = null;
+                var tokendata = localStorage.getItem('secret-token')
+                var id = localStorage.getItem('id');
+                console.log(data,"-=-=-=-=-");
+                $.ajax({
+                    type: "POST",
+                    url: '/blog',
+                    data: formData,
+                    beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+                    success: function (data) {
+                        console.log(data);
+                        document.getElementById('val2').innerHTML = 'Record Added...'
+                        $('#msg_modal').modal('show').on('shown.bs.modal', function (f) {
+                            setTimeout(function () {
+                                location.href = "/blog/list"
+                            }, 2000);
+                        })
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        document.getElementById('val1').innerHTML = data.responseJSON.message;
+                        $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                            setTimeout(function () {
+                                
+                                if(data.responseJSON.status="false")
+                                {
+                                    // location.reload();
+                                }
+                                else{
+                                    // localStorage.clear();
+                                    // location.href = "/auth/login";
+                                }
+                                
+                            }, 2000);
+                        })
+                    }
+                });
+            }
+    }
+    function editFunc(){
+        console.log("edit fun");
+        $("#formId").validate({
+            rules: {
+                title: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 20
+                },
+                blog: {
+                    required: true
+                }
+            },
+            messages: {
+
+                title: {
+                    required: "Enter Title",
+                },
+                blog: {
+                    required: "Enter Blog Content",
+                }
+            },
+            submitHandler: function (form) {
+                form.submit();
+            },
+            errorPlacement: function (label, element) {
+                label.insertAfter(element);
+            },
+        })
+        if ($("#formId").valid()) {
+            // var data = CKEDITOR.instances.blog.getData();
+            var tokendata = localStorage.getItem('secret-token')
+            var id = $('#id').val();
+            let formData = $('#formId').serializeArray();
+            formData[1].value = CKEDITOR.instances.blog.getData();
+
+            console.log("++++++++++++",formData);
+            $.ajax({
+                type: "PUT",
+                url: '/blog/' + id,
+                data: formData,
+                beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+                success: function (data) {
+                    // console.log(data);
+                    document.getElementById('val2').innerHTML = 'Record Updated...'
+                    $('#msg_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            location.replace(document.referrer);
+                        }, 2000);
+                    })
+                },
+                error: function (data) {
+                    console.log(data);
+                    document.getElementById('val1').innerHTML = data.responseJSON.message;
+                    $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            
+                            if(data.responseJSON.status="false")
+                            {
+                                // location.reload();
+                            }
+                            else{
+                                localStorage.clear();
+                                location.href = "/auth/login";
+                            }
+                            
+                        }, 2000);
+                    })
+                }
+            });
+        }
+    }
+            
+    function BackFunc(){
+        location.href = "/blog/home"  
+    }
+</script>
+</html>

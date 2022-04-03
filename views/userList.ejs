@@ -1,0 +1,388 @@
+<html>
+
+<head>
+    <title>Admin | User List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <link rel="stylesheet" href="../stylesheets/style.css"> -->
+</head>
+
+<body>
+
+    <div class="m-5 p-5">  
+        <h3 class="mydiv2">User List</h3>      
+        
+        <div class="col col-12 mb-3 mydiv">
+            <button class="btn btn-info mydiv mydiv1" onclick="posts()">Post List</button>
+            <button class="btn btn-info mydiv mydiv1" style="width: 120px; margin-left: 3px;" onclick="blogs()">Blog List</button>
+            
+            <button class="btn btn-dark mydiv mydiv3" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="page" style="width: auto;">
+            <div id="loading"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+            <table id="student_table" class="table table-bordered" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Date Of Birth</th>
+                        <th>Technology</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table><br>
+        </div>
+    </div>
+    <div id="msg_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val2" style="color: green;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="err_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="val1" style="color: red;"></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="add-modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Post</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="formId">
+                        <div>
+                            Title: <input type="text" name="title" id="title" class="form-control"
+                            value="<% if(typeof title != 'undefined'){ %><%= title %><% }%>">
+                            <span id="error_msg"></span>
+                        </div>
+                        <div>
+                            Description: <input type="text" name="desc" id="desc" class="form-control"
+                            value="<% if(typeof desc != 'undefined'){ %><%= desc %><% }%>">
+                            <span id="error_msg"></span>
+                        </div>                        
+                        
+                        <input type="hidden" name="id" id="id"
+                            value="<% if(typeof id != 'undefined'){%><%= _id%><% } %>"><br>
+                        <input type="button" name="insert" id="insert" value="Add" onclick="addFunc()"
+                            class="btn btn-success" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="update_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Data</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="update_form">
+                        Title: <input type="text" name="title" id="title1" class="form-control">
+                        Desciption: <input type="text" name="desc" id="desc1" class="form-control">
+                        <input type="hidden" name="id" id="id1"><br>
+                        <input type="button" name="update" value="Update" onclick="EditFunc()"
+                            class="btn btn-success" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="delete_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Are Sure you want to delete record ??</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="delete_form">
+                        <input type="hidden" name="delid" id="delid"><br>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">Cancle</button>
+                        <input type="button" name="delete" id="delete-btn" value="Delete" onclick="DelFunc()"
+                            class="btn btn-danger" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="active_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="confirmmsg"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="delete_form">
+                        <input type="hidden" name="actid" id="actid"><br>
+                        <button type="button" class="btn btn-warning delbtn" data-dismiss="modal">Cancle</button>
+                        <input type="button" name="delete" id="delete-btn" value="Yes" onclick="ActFunc()"
+                            class="btn btn-danger delbtn" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+</body>
+
+<!-- <script src="https://code.jquery.com/jquery-3.5.0.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+
+
+    $(document).ready(function () {
+        $("#student_table").hide();
+        var tokendata = localStorage.getItem('secret-token')
+        var id = localStorage.getItem('id');
+
+        dispData();
+
+    });
+
+    function dispData(id) {
+
+        var tokendata = localStorage.getItem('secret-token')
+        if (id) {
+            $('#update_modal').modal('show');
+            $.ajax({
+                url: "/post/" + id,
+                type: "GET",
+                beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+                success: function (data) {
+                    $('#loading').hide();
+
+                    console.log("========", JSON.stringify(data.data));
+                    const pdata = JSON.stringify(data.data);
+                    const postData = JSON.parse(pdata);
+                    console.log("------------", postData);
+                    $('#update_modal').modal('show');
+                    $('#title1').val(postData.title);
+                    $('#desc1').val(postData.desc);
+                    $('#id1').val(postData._id);
+                },
+                error: function (data) {
+                    $('#loading').hide();
+                    document.getElementById('val1').innerHTML = data.responseText;
+                    $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            
+                            // if(data.responseJSON.status="false")
+                            // {
+                                location.href = "/post/home";
+                            // }
+                            // else{
+                            //     localStorage.clear();
+                            //     location.href = "/auth/login";
+                            // }
+                            
+                        }, 2000);
+                    })
+                },
+            });
+        } else {
+            $.ajax({
+                url: "/user",
+                type: "GET",
+                // headers:{'secret-token': tokendata},   
+                beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+                success: function (data) {
+                    $('#loading').hide();
+                    $("#student_table").show();
+                    console.log(tokendata);
+                    console.log("------------",data.data);
+
+                    $('#student_table').DataTable({
+                        data: data.data,
+                        columns: [
+                            { data: 'fname' },
+                            { data: 'lname' },
+                            { data: data,
+                                "render":function(data,type,row){
+                                    return moment(data.dateofbirth).format("DD-MM-YYYY")
+                                },
+                            },
+                            { data: 'technology'},
+                            { data: 'email'},
+                            {
+                                data: data,
+                                className: "dt-center editor-edit",
+                                "render": function (data, type, row, meta)
+                                {
+                                    if(data.isActive == true){
+                                        return '<div>Active</div>'
+                                    }
+                                    else{
+                                        return '<div>Inactive</div>'
+                                    }
+                                },
+                                orderable: false
+                            },
+                            {
+                                data: data,
+                                className: "dt-center editor-delete",
+                                "render": function (data, type, row, meta)
+                                { 
+                                    var id = localStorage.getItem('id');
+                                    if(id != data._id){
+                                        if(data.isActive == true){
+                                            return '<button class="btn_del btn btn-danger" onclick="inactiveopen(\'' + data._id + '\')"><i class="fa fa-user-times"/></button>'; 
+                                        }
+                                        else{
+                                            return '<button class="btn_del btn btn-success" onclick="activeopen(\'' + data._id + '\')"><i class="fa fa-user-plus"/></button>'; 
+                                        }
+                                    }
+                                    else{
+                                        return '<button class="btn btn-danger" disabled><i class="fa fa-ban"></i></button>'; 
+                                    }                                    
+                                    
+                                },
+                                orderable: false
+                            }
+                        ]
+                    });
+                },
+                error: function (data) {
+                    $('#loading').hide();
+                    console.log(data);
+                    document.getElementById('val1').innerHTML = data.responseJSON.message;
+                    $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {
+                            
+                            if(data.responseJSON.status="false")
+                            {
+                                // location.reload();
+                                location.href ="/auth/login";
+                            }
+                            else{
+                                localStorage.clear();
+                                location.href = "/auth/login";
+                            }
+                            
+                        }, 2000);
+                    })
+                },
+            });
+        }
+    }
+
+   
+    function inactiveopen(id) {
+        $('#active_modal').modal('show');
+        $('#actid').val(id);
+        document.getElementById("confirmmsg").innerHTML = "Are You Sure You want to Deactivate User ?"
+        console.log("____", id);
+    }
+    function activeopen(id) {
+        $('#active_modal').modal('show');
+        $('#actid').val(id);
+        document.getElementById("confirmmsg").innerHTML  = "Are You Sure You want to Activate User?"
+        console.log("____", id);
+    }
+    
+
+    function ActFunc(){
+        var tokendata = localStorage.getItem('secret-token')
+        var id2 = $('#actid').val();
+        console.log("---",id2);
+        console.log("===",tokendata);
+        $.ajax({
+            type: "POST",
+            url: '/user/' + id2,
+            // data: formData,
+            beforeSend: function (xhr) { xhr.setRequestHeader('Authorization', tokendata); },
+            success: function (data) {
+                console.log(data.data);
+                if(data.data.isActive==true){
+                    document.getElementById('val2').innerHTML = 'User Activated...'
+                }
+                else{
+                    document.getElementById('val2').innerHTML = 'User Deactivated...'
+                }
+                $('#active_modal').modal('hide');
+                $('#msg_modal').modal('show').on('shown.bs.modal', function (f) {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                })
+            },
+            error: function (data) {
+                console.log("Error");
+                $('#active_modal').modal('hide');
+                document.getElementById('val1').innerHTML = data.responseJSON.message;
+                $('#err_modal').modal('show').on('shown.bs.modal', function (f) {
+                        setTimeout(function () {                            
+                            if(data.responseJSON.status="false")
+                            {
+                                location.reload();
+                            }
+                            else{
+                                localStorage.clear();
+                                location.href = "/auth/login";
+                            }
+                            
+                        }, 2000);
+                    })
+            }
+        });
+    }
+
+    function logout(){
+        localStorage.clear();
+        location.href="/auth/login"
+    }
+    function posts(){
+        location.href="/post/index"
+    }
+
+    function blogs(){
+        location.href="/blog/index"
+    }
+</script>
+
+
+</html>
